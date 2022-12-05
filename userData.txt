@@ -1,0 +1,3 @@
+UserName:test1
+Store:Gucci
+Password:1
