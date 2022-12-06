@@ -38,18 +38,6 @@ public class SignUpDialog extends JDialog {
 	private PrintWriter buffer;
 	private JSpinner spinnerCurrency;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		try {
-			SignUpDialog dialog = new SignUpDialog();
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			dialog.setVisible(true);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 
 	/**
 	 * Create the dialog.
@@ -232,19 +220,6 @@ public class SignUpDialog extends JDialog {
 							//saving store in second place for easier use of data in VendorPage
 							buffer.println("Store:" + getStoreName);
 							
-							//Exception for not matching passwords
-							if(passwordField.getText().equals(passwordFieldConfirm.getText())) {
-								buffer.println("Password:" + passwordField.getText());
-							}else {
-								throw new Exception("Password doesn't match. Please try again");
-							}
-							
-							//Exeption for empty fields
-							if(getStoreName.isEmpty() || getUsername.isEmpty() || 
-									getPassword.isEmpty() || getPasswordConfirm.isEmpty() ) {
-								throw new Exception("Please fill out all the fileds marked with: * ");
-							}
-							
 							//Saves budget information if the user decides to fill it out
 							if(!textFieldBudget.getText().isEmpty()) {
 								buffer.println("Budget:" + textFieldBudget.getText());
@@ -253,9 +228,26 @@ public class SignUpDialog extends JDialog {
 							double budgetNumber = Double.parseDouble(textFieldBudget.getText());
 							
 								//saving currency value to the text document
-								buffer.println(spinnerCurrency.getValue());
+								buffer.println("Currency:" + spinnerCurrency.getValue());
 															
 							}
+								//Saving default spent number to change later
+								buffer.println("Spent: 00.00");
+							
+							//Exception for not matching passwords
+							if(passwordField.getText().equals(passwordFieldConfirm.getText())) {
+								buffer.println("Password:" + passwordField.getText());
+							}else {
+								throw new Exception("Password doesn't match. Please try again");
+							}
+							
+							//Exception for empty fields
+							if(getStoreName.isEmpty() || getUsername.isEmpty() || 
+									getPassword.isEmpty() || getPasswordConfirm.isEmpty() ) {
+								throw new Exception("Please fill out all the fileds marked with: * ");
+							}
+							
+							
 													
 							//Closing the stream and writer
 							buffer.close();
