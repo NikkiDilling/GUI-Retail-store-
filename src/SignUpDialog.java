@@ -22,6 +22,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JPasswordField;
 import java.awt.event.ActionListener;
 import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.awt.event.ActionEvent;
 import javax.swing.JSpinner;
@@ -38,7 +39,7 @@ public class SignUpDialog extends JDialog {
 	private PrintWriter buffer;
 	private JSpinner spinnerCurrency;
 
-
+	private Client registeredClient;
 	/**
 	 * Create the dialog.
 	 */
@@ -215,24 +216,26 @@ public class SignUpDialog extends JDialog {
 							String getPassword = passwordField.getText();
 							String getPasswordConfirm = passwordFieldConfirm.getText();
 							
-							
+							//saving to text file to use for logging in
 							buffer.println("UserName:" + getUsername);
+							//Initializing the client (later saved to a binary file)
+							registeredClient = new Client(getUsername);
+							
 							//saving store in second place for easier use of data in VendorPage
-							buffer.println("Store:" + getStoreName);
+							registeredClient.setStoreName(getStoreName);
 							
 							//Saves budget information if the user decides to fill it out
 							if(!textFieldBudget.getText().isEmpty()) {
-								buffer.println("Budget:" + textFieldBudget.getText());
+								
 								
 							//checking is the values is double, else -> throws NumberFormatException
-							double budgetNumber = Double.parseDouble(textFieldBudget.getText());
-							
-								//saving currency value to the text document
-								buffer.println("Currency:" + spinnerCurrency.getValue());
-															
+							Double budgetNumber = Double.parseDouble(textFieldBudget.getText());
+							registeredClient.setBudget(budgetNumber);
+								//saving currency value to the client
+								registeredClient.setCurrency(spinnerCurrency.getValue()+"");
 							}
 								//Saving default spent number to change later
-								buffer.println("Spent: 00.00");
+								registeredClient.setMoneySpent(00.00);
 							
 							//Exception for not matching passwords
 							if(passwordField.getText().equals(passwordFieldConfirm.getText())) {
@@ -252,6 +255,14 @@ public class SignUpDialog extends JDialog {
 							//Closing the stream and writer
 							buffer.close();
 							outputstream.close();
+							
+							//Saving the registered client for the first time
+							//first time writing binary file for registered client
+								//each user has unique data file (user name + type of document) in bin folder
+								FileOutputStream outputStream = new FileOutputStream("bin\\" + getUsername +"-Data.data",false);
+								ObjectOutputStream binaryWriter = new ObjectOutputStream(outputStream);
+								//saving user information (writing user to file)
+								binaryWriter.writeObject(registeredClient);
 							
 							JOptionPane.showMessageDialog(SignUpDialog.this, "Thank you for registering! You can now login");
 							

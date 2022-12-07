@@ -1,5 +1,2 @@
 UserName:1
-Store:Store One
-Budget:1.000
-Currency:USD
 Password:1

@@ -26,12 +26,13 @@ public class LoginDialog extends JDialog {
 	private JTextField textField_Username;
 	private JPasswordField passwordField;
 	String userName;
-
+	
 
 	/**
 	 * Create the dialog.
 	 */
 	public LoginDialog() {
+		setTitle("Log in");
 		setBounds(100, 100, 402, 270);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -43,7 +44,7 @@ public class LoginDialog extends JDialog {
 		gbl_contentPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		contentPanel.setLayout(gbl_contentPanel);
 		{
-			JLabel lblNewLabel = new JLabel("Login");
+			JLabel lblNewLabel = new JLabel("Log in");
 			lblNewLabel.setIcon(new ImageIcon("C:\\Users\\ndill\\eclipse-workspace\\Final Project\\login-icon.png"));
 			GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 			gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
@@ -143,6 +144,7 @@ public class LoginDialog extends JDialog {
 									vendorPage.setVisible(true);
 									//Closing the login dialog
 									dispose();
+									break;
 									
 								}
 								
@@ -178,6 +180,7 @@ public class LoginDialog extends JDialog {
 				cancelButton.setActionCommand("Cancel");
 				buttonPane.add(cancelButton);
 			}
+			
 		}
 	}
 }

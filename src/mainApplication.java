@@ -81,17 +81,17 @@ public class mainApplication extends JFrame {
 		btnRegister.setBounds(95, 250, 200, 40);
 		
 		//Button 2 "Login"
-		btnLogin = new JButton("Login");
+		btnLogin = new JButton("Log in");
+		btnLogin.setIcon(new ImageIcon("C:\\Users\\ndill\\eclipse-workspace\\Final Project\\login-icon.png"));
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
 				//Creating and initializing login dialog
 				LoginDialog login = new LoginDialog();
-				
-				//disables the main application when login button has been pressed
-				frame.setEnabled(false);
 				//Opening another window to login
 				login.setVisible(true);
+				
+				frame.dispose();
 			}
 		});
 		btnLogin.setFont(new Font("Tahoma", Font.BOLD, 14));

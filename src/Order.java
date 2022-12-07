@@ -1,12 +1,21 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Order {
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import javax.swing.SwingWorker;
+
+public class Order implements Serializable{
 	
 	private final String orderNumber;
+	//Array list for storing all the items of class Clothing in the order
 	private ArrayList<Clothing> itemsArray = new ArrayList<>();
-	
-	
+	//total price with default value
+	private int totalPrice = 0;
+	//creating SwingWorker as a global variable
+			private SwingWorker<Boolean, Integer> worker;
+
 	//Creating an order with an order number
 	public Order() {
 	
@@ -17,7 +26,7 @@ public class Order {
 		//assigning a random number to an order to make "unique" order number
 		this.orderNumber = "O-" + number;
 		//debugging
-		System.out.println("from order class: " + this.orderNumber);
+		System.out.println("(ORDER) new order added: " + this.orderNumber);
 	}
 	
 	public String getOrderNumber() {
@@ -31,7 +40,25 @@ public class Order {
 	public void setItemsArray(Clothing itemToAdd) {
 		this.itemsArray.add(itemToAdd);
 	}	
-
 	
+	
+	public int getTotalOrderPrice() {
+		System.out.println("(ORDER)total price of order: " + totalPrice);
+		return totalPrice;
+	}
+	
+	public void setTotalOrderPrice(int price) {
+		this.totalPrice = price;
+	}
+
+	//method that sets order price in a label in Vendor page
+	//used in a thread
+	public void setLabelTotalPrice(JLabel lblDisplayPrice) {
+		
+		lblDisplayPrice.setText(getTotalOrderPrice()+" USD");
+		
+		
+	}
+
 
 }

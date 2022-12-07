@@ -1,5 +1,6 @@
+import java.io.Serializable;
 
-public class Clothing {
+public class Clothing implements Serializable{
 	
 	//Variable to use in addToOrder JDialog
 	private String itemName;
@@ -22,9 +23,9 @@ public class Clothing {
 			"Little black Dress: S -12",
 			"Little black Dress: M -12",
 			"Little black Dress: L -12",
-			"Rock band T-shirt: S -6",
-			"Rock band T-shirt: M -6",
-			"Rock band T-shirt: L -6",
+			"Rock band Tshirt: S -6",
+			"Rock band Tshirt: M -6",
+			"Rock band Tshirt: L -6",
 			"Reaped jeans: S -10",
 			"Reaped jeans: M -10",
 			"Reaped jeans: L -10",
