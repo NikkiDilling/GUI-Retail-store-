@@ -19,7 +19,9 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.awt.event.ActionEvent;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -54,7 +56,7 @@ public class mainApplication extends JFrame {
 		frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
 		
 		//Creating path to background image and placing it in the frame
-		storeIcon = new ImageIcon("img.jpg");
+		storeIcon = new ImageIcon("background.jpg");
 		myLabel = new JLabel("", storeIcon,JLabel.CENTER);
 		myLabel.setBackground(Color.WHITE);
 		myLabel.setBounds(0,0,400,600);
@@ -105,6 +107,9 @@ public class mainApplication extends JFrame {
 		//Making the frame visible
 		frame.setVisible(true);	
 		
+	
 		
 	}
+	
+
 }

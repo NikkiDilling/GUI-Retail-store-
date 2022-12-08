@@ -195,7 +195,7 @@ public class addToOrder extends JDialog {
 						if(thread != null) {
 							thread.stop();
 						}
-						mainTextArea.append("Item: " + clothesToAdd.getItemName() + "added to order." + "\n");
+						mainTextArea.append("Item: " + clothesToAdd.getItemName() + "added to order: " + newOrder.getOrderNumber() +"\n");
 						mainTextArea.append("Quantity added: " + clothesToAdd.getQuantity() + "\n");
 						mainTextArea.append("Price: " + clothesToAdd.getTotalPrice() + "\n" );
 						mainTextArea.append("=====================================================" + "\n");
@@ -222,7 +222,8 @@ public class addToOrder extends JDialog {
 		
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		setVisible(true);
-	}
+
+	}//End of dialog frame
 	
 	//Multithreading method for calculating and displaying price of an item
 	public class slowTask implements Runnable{

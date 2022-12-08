@@ -20,8 +20,8 @@ public class Order implements Serializable{
 	public Order() {
 	
 		Random r = new Random();
-		//generating random numbers from 100 to 200
-		int number = r.nextInt(100)+100;
+		//generating random numbers from 100 to 500
+		int number = r.nextInt(100)+500;
 		
 		//assigning a random number to an order to make "unique" order number
 		this.orderNumber = "O-" + number;

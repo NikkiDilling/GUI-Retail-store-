@@ -14,6 +14,7 @@ import java.awt.GridBagConstraints;
 import javax.swing.JTextField;
 import java.awt.Insets;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -174,6 +175,16 @@ public class editAccount extends JDialog {
 				JButton cancelButton = new JButton("Cancel");
 				cancelButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
+						//opening the vendor page again
+						VendorPage vendorPage;
+						try {
+							vendorPage = new VendorPage(username);
+							vendorPage.setVisible(true);
+						} catch (FileNotFoundException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						
 						//closing dialog without making changes
 						dispose();
 					}

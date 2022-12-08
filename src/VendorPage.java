@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
@@ -27,6 +28,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
 import javax.swing.JButton;
 import java.awt.Insets;
 
@@ -47,7 +50,7 @@ public class VendorPage extends JFrame {
 	private String budget;
 	private String currency;
 	private JMenuItem menu_showOrders;
-	 // variable to check if the client user is initialized (order saved, user data file exists)
+	// variable to check if the client user is initialized (user data file exists)
 	private Client currentUser;
 	//List variables
 	private JList<String> list;//receives data from listModel
@@ -74,11 +77,20 @@ public class VendorPage extends JFrame {
 	private JButton btnCalculate;
 	//Creating a thread as a global variable
 	private Thread thread;
-	
+	//variable for saving index of the last item price added to totalOrderPrice in the thread
+	private int indexOfLastItem = 0;
+		
 	private JButton btnSaveOrder;
 	private JMenu mnNewMenu_2;
 	private JMenuItem menu_showItems;
-
+	//downcasted later to mouseAdapter to add and remove mouse listener from JList
+	//needed to change between action in "show orders" and "show items
+	private MouseListener mL;
+	private JMenu menuFile;
+	private JMenuItem menuResetTextArea;
+	private JMenuItem menu_sortItems;
+	
+	
 	/**
 	 * Create the frame.
 	 * @throws FileNotFoundException 
@@ -93,6 +105,18 @@ public class VendorPage extends JFrame {
 		
 		menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
+		
+		menuFile = new JMenu("File");
+		menuBar.add(menuFile);
+		
+		menuResetTextArea = new JMenuItem("Clear text area");
+		menuResetTextArea.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//resetting text area
+				mainTextArea.setText("");
+			}
+		});
+		menuFile.add(menuResetTextArea);
 		
 		mnNewMenu = new JMenu("Account");
 		menuBar.add(mnNewMenu);
@@ -131,6 +155,8 @@ public class VendorPage extends JFrame {
 					//showing orders if the array is not null
 					if(!userFromFile.getClientOrders().isEmpty()) {
 						//Fill the ArrayList with data
+						
+							//resetting array list
 							listData.clear();
 							for(Order order : userFromFile.getClientOrders()) {
 								listData.add(order.getOrderNumber());
@@ -140,30 +166,34 @@ public class VendorPage extends JFrame {
 							//Pass listData to listModel
 							listModel.addAll(listData);
 							
-							//Adding action on click to list items
-							list.addMouseListener(new MouseAdapter() {
+							//resetting mouse adapter
+							list.removeMouseListener(mL);
+							//Adding action to list and initializing mL (mouseListener)
+							list.addMouseListener(mL= new MouseAdapter() {
 								
 								
 								@Override
 								public void mouseReleased(MouseEvent e) {
 									
 									try {
-															
+										
 									//saving index of the selected item in the ArrayList clothing.rawData
-									int index = list.getSelectedIndex();
 									//no need for anything else because list index and order index will always match
+									int index = list.getSelectedIndex();
+									//variable for storing order object from file, getting it by index from JList
 									Order clickedOrder = userFromFile.getClientOrders().get(index);
 									
 									//Displaying order information
-									//resets text area
-									mainTextArea.setText(clickedOrder.getOrderNumber()+" \n");
+									mainTextArea.append(clickedOrder.getOrderNumber()+" \n");
 									//printing order items information
 									for(int i = 0; i < clickedOrder.getItemsArray().size();i++) {
 										
 										Clothing item = clickedOrder.getItemsArray().get(i);
 										mainTextArea.append(item.getItemName()+ " Quantity: " + item.getQuantity() +
 												" Price: " +item.getTotalPrice() +" \n");
+								
 									}
+									mainTextArea.append("Total order price: " +clickedOrder.getTotalOrderPrice() + " USD\n");
 									//Order end
 									mainTextArea.append("=====================================================" + "\n");
 									
@@ -176,8 +206,7 @@ public class VendorPage extends JFrame {
 								}
 									
 							
-							});
-							
+							});//end of mouse listener
 							
 					}else {
 						throw new IOException("You have no orders. \n Please place an order first");
@@ -197,7 +226,11 @@ public class VendorPage extends JFrame {
 		menu_showItems = new JMenuItem("Show Items");
 		menu_showItems.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
+				
+				//enabling the sort items menu since items are now displayed
+				menu_sortItems.setEnabled(true);
+				
+				//resetting array list
 				listData.clear();
 				//Fill the ArrayList with data
 				for(String clothingItem : Clothing.rawData) {
@@ -208,23 +241,23 @@ public class VendorPage extends JFrame {
 				//Pass listData to listModel
 				listModel.addAll(listData);
 				
-				//initialize JList
-				//list = new JList(listModel);
-				
-				
-					//Adding action on click to list items
-				list.addMouseListener(new MouseAdapter() {
+				//Resetting mouse adapter
+				list.removeMouseListener(mL);
+						
+
+				//Adding action to list and initializing mL (mouseListener)
+				list.addMouseListener(mL = new MouseAdapter() {
 					
 					//Throws exception if clicked before creating an order		
 					@Override
-					public void mouseClicked(MouseEvent e) {
+					public void mouseClicked(MouseEvent event) {
 						
 						try {
 												
 						//saving index of the selected item in the ArrayList
-						int index = list.getSelectedIndex();
+						int indexClothing = list.getSelectedIndex();
 						//getting value of the item by its index
-						String value = listModel.get(index);
+						String value = listModel.get(indexClothing);
 						//splitting the value string into 2 strings
 						String [] splits = value.split("-");
 						
@@ -234,34 +267,55 @@ public class VendorPage extends JFrame {
 						System.out.println("from vendor - [1]: " + splits[1]);
 						*/
 						System.out.println("(VENDOR) openning add to order");
-						
+					
 						//Creating add to order dialog and passing item and order information
-						addToOrder addDialog = new addToOrder(VendorPage.this, mainTextArea, newOrder, splits[0], splits[1]);
-						addDialog.setVisible(true);
+						addToOrder addDialog = new addToOrder(VendorPage.this, mainTextArea, newOrder, splits[0], splits[1]);				
 						
 							//Enabling buttons the calculate button when an order has an item in it	
 							btnCalculate.setEnabled(true);
-							btnSaveOrder.setEnabled(true);	
+							//cannot save order without calculating total order price
+							//that's how total order price get's set
+							btnSaveOrder.setEnabled(false);
+							//disabling menu item "new order" when ordering is in process
+							menuNewOrder.setEnabled(false);
 						}catch(NullPointerException ex){
 							JOptionPane.showMessageDialog(VendorPage.this, "Please create a new order first!" + "\n" +"Orders -> New Order");
 							ex.printStackTrace();
 						}
 					}
-						
+					
+				});	//end of mouse event/listener
 				
-				});
+				
+
+			}//end of action performed
+		}); 
+		mnNewMenu_2.add(menu_showItems);
+		
+		menu_sortItems = new JMenuItem("Sort Items");
+		//disabling the sort Items menu until show items is clicked again
+		menu_sortItems.setEnabled(false);
+		menu_sortItems.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//sorting the list alphabetically
+				Collections.sort(listData);
+				listModel.clear();
+				listModel.addAll(listData);
+				
+				//disabling the menu again until show items is clicked again
+				menu_sortItems.setEnabled(false);
 			}
 		});
-		mnNewMenu_2.add(menu_showItems);
+		mnNewMenu_2.add(menu_sortItems);
 			
 		menuNewOrder = new JMenuItem("New Order");
 		menuNewOrder.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				newOrder = new Order();
-				mainTextArea.append("Order: " + newOrder.getOrderNumber()+ " is created" + "\n");
-				mainTextArea.append("=====================================================" + "\n");
-				
-			
+					
+					newOrder = new Order();
+					mainTextArea.append("Order: " + newOrder.getOrderNumber()+ " is created" + "\n");
+					mainTextArea.append("=====================================================" + "\n");
+					
 			}
 		});
 		mnNewMenu_1.add(menuNewOrder);
@@ -338,10 +392,7 @@ public class VendorPage extends JFrame {
 		btnCalculate.setEnabled(false);
 		btnCalculate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
-				//Disabling the calculate button after the calculation stops
-				btnCalculate.enable(false);
-				
+							
 				try {
 					System.out.println("(VENDOR_btn) starting thread");
 					//Starting the thread that calculates and displays the total order price
@@ -351,6 +402,9 @@ public class VendorPage extends JFrame {
 				}catch(Exception ex) {
 					JOptionPane.showMessageDialog(VendorPage.this, ex.getMessage());
 				}
+				
+				//enabling save order again, since total order price is now set
+				btnSaveOrder.setEnabled(true);
 			}
 		});
 		
@@ -385,18 +439,22 @@ public class VendorPage extends JFrame {
 		btnSaveOrder.setEnabled(false);
 		btnSaveOrder.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
-				try {
+				//disabling the save btn after it was clicked
+				//so the same order is not saved twice
+				btnSaveOrder.setEnabled(false);
 				
+				try {
+					
 					//checking if the file for the client data exists
 					if(doRead() == true) {
 						
 						FileInputStream inputStream = new FileInputStream("bin\\" +username +"-Data.data");
 						ObjectInputStream binaryReader = new ObjectInputStream(inputStream);
 					
-						//Initializing a client if the client information exists
+						//Initializing a temporary client if the client information exists
 						Client userFromFile = (Client) binaryReader.readObject();
-							
+						
+						
 							//closing stream
 							inputStream.close();
 							binaryReader.close();
@@ -405,23 +463,17 @@ public class VendorPage extends JFrame {
 						//the old user will be rewritten
 						currentUser = new Client(username,userFromFile.getClientOrders(), userFromFile.getStoreName(),userFromFile.getMoneySpent());
 						
+						//setting current users budget if the userFromFile budget is not zero
 						if(userFromFile.getBudget() != 0) {
 							currentUser.setBudget(userFromFile.getBudget());
 							currentUser.setCurrency(userFromFile.getCurrency());
 
 						}
 						
-							/*
-							//debugging
-							System.out.println("order from file 1: " + userFromFile.getClientOrders().get(0).getOrderNumber());
-							if(userFromFile.getClientOrders().size() >= 2) {
-								System.out.println("order from file 2: " + userFromFile.getClientOrders().get(1).getOrderNumber());
-								if(userFromFile.getClientOrders().size() > 2) {
-								System.out.println("order from file 3: " + userFromFile.getClientOrders().get(2).getOrderNumber());
-								}
-							}//end of debugging
-							*/
-					
+						//calculating and setting current users money spent
+						currentUser.setMoneySpent(userFromFile.getMoneySpent() + newOrder.getTotalOrderPrice());
+						//displaying the money spent
+						lblSpentDisplay.setText(currentUser.getMoneySpent()+" USD ");
 
 					//adding the current order to client arrayList
 					currentUser.getClientOrders().add(newOrder);
@@ -431,15 +483,16 @@ public class VendorPage extends JFrame {
 						ObjectOutputStream binaryWriter = new ObjectOutputStream(outputStream);
 						//saving user information (writing user to file)
 						binaryWriter.writeObject(currentUser);
+						
+						//Printing information about saving order to user
+						mainTextArea.append("Order: " + newOrder.getOrderNumber() + " is saved!");
+						mainTextArea.append("=====================================================" + "\n");
+						//debugging
 						System.out.println("current user orders saved" + currentUser.getClientOrders());
-						/* debugging
-						System.out.println("order 1: " + currentUser.getClientOrders().get(0).getOrderNumber());
-						System.out.println("order 2: " + currentUser.getClientOrders().get(1).getOrderNumber());
-						if(currentUser.getClientOrders().size() > 2) {
-							System.out.println("order 3: " + currentUser.getClientOrders().get(2).getOrderNumber());
-						}
-						*/
-						//Runs only if somehow file does not exist
+													
+							//enabling menu item "new order" after order was saved
+							menuNewOrder.setEnabled(true);
+							
 							
 						//closing streams
 							outputStream.close();
@@ -494,6 +547,8 @@ public class VendorPage extends JFrame {
 				lblStoreNameDisplay.setText(userFromFile.getStoreName()+" ");
 				lblBudgetDisplay.setText(userFromFile.getBudget()+userFromFile.getCurrency()+ " ");
 				lblSpentDisplay.setText(userFromFile.getMoneySpent()+" ");
+				//debugging
+				System.out.println("(542)money spent file: " + userFromFile.getMoneySpent());
 				
 				//closing streams
 				inputStream.close();
@@ -523,30 +578,45 @@ public class VendorPage extends JFrame {
 			
 			//btn calculating is disabled while calculating
 			btnCalculate.setEnabled(false);
+			
+			if(lblDisplayPrice.getText().equals("-")) {
 			//Going through the order item array and calculating the total price one by one
 				for(Clothing item : newOrder.getItemsArray()) {
 					
 					try {
 						//slowing down the thread for smooth display
 						thread.sleep(100);
-					//calculating final order price
-					totalOrderPrice += item.getTotalPrice();
-					//updating the price in order class
-					newOrder.setTotalOrderPrice(totalOrderPrice);
-					//updating the label in Vendor class
-					newOrder.setLabelTotalPrice(lblDisplayPrice);
+					
+					
+						
+							//calculating final order price
+							totalOrderPrice += item.getTotalPrice();
+							//updating the price in order class
+							newOrder.setTotalOrderPrice(totalOrderPrice);
+							//updating the label in Vendor class
+							newOrder.setLabelTotalPrice(lblDisplayPrice);
+							//updating the index
+							indexOfLastItem++;
 					
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+				}//end of for each loop
+			}else {
+				//add the price of the newly added items to the previous calculation of the total order price
+				for(int i = indexOfLastItem; i < newOrder.getItemsArray().size(); i++) {
+					//calculating final order price
+					totalOrderPrice += newOrder.getItemsArray().get(i).getTotalPrice();
+					//updating the price in order class
+					newOrder.setTotalOrderPrice(totalOrderPrice);
+					//updating the label in Vendor class
+					newOrder.setLabelTotalPrice(lblDisplayPrice);
+					//updating the index
+					indexOfLastItem++;
 				}
-			
-				
-			
-			
-		
-			
+			}
+
 		}
 		
 	}
@@ -571,4 +641,4 @@ public class VendorPage extends JFrame {
 	}
 	
 	
-}
+}//end of Class

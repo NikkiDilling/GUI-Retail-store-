@@ -33,7 +33,7 @@ public class LoginDialog extends JDialog {
 	 */
 	public LoginDialog() {
 		setTitle("Log in");
-		setBounds(100, 100, 402, 270);
+		setBounds(100, 100, 356, 270);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -172,7 +172,6 @@ public class LoginDialog extends JDialog {
 					public void actionPerformed(ActionEvent e) {
 						//Opening main page
 						mainApplication main = new mainApplication();
-						main.setVisible(true);
 						//Closing login window
 						dispose();
 					}
