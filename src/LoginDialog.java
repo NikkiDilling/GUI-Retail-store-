@@ -16,6 +16,7 @@ import java.awt.Insets;
 import javax.swing.JPasswordField;
 import java.awt.event.ActionListener;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.LinkedList;
 import java.util.Scanner;
 import java.awt.event.ActionEvent;
@@ -45,6 +46,7 @@ public class LoginDialog extends JDialog {
 		contentPanel.setLayout(gbl_contentPanel);
 		{
 			JLabel lblNewLabel = new JLabel("Log in");
+			lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
 			lblNewLabel.setIcon(new ImageIcon("C:\\Users\\ndill\\eclipse-workspace\\Final Project\\login-icon.png"));
 			GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 			gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
@@ -95,7 +97,8 @@ public class LoginDialog extends JDialog {
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				JButton okButton = new JButton("OK");
+				JButton okButton = new JButton("Log in");
+				okButton.setFont(new Font("Tahoma", Font.PLAIN, 14));
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						
@@ -138,7 +141,7 @@ public class LoginDialog extends JDialog {
 								
 								//checking if the linked list has exactly 2 values
 								if(conditions.size() == 2) {
-									JOptionPane.showMessageDialog(LoginDialog.this, "Login was successful");
+									JOptionPane.showMessageDialog(LoginDialog.this, "Login successful");
 									//Creating the vendor page and passing the store name as parameter
 									VendorPage vendorPage = new VendorPage(userName);
 									vendorPage.setVisible(true);
@@ -155,6 +158,8 @@ public class LoginDialog extends JDialog {
 									throw new Exception("Incorrect username or password");
 								}
 								
+						}catch(FileNotFoundException ex) {
+							JOptionPane.showMessageDialog(LoginDialog.this, "This user does not exist. Please register first");
 						} catch (Exception ex) {
 							//Printing the error message in a pop up dialog
 							JOptionPane.showMessageDialog(LoginDialog.this, ex.getMessage());
@@ -168,6 +173,7 @@ public class LoginDialog extends JDialog {
 			}
 			{
 				JButton cancelButton = new JButton("Cancel");
+				cancelButton.setFont(new Font("Tahoma", Font.PLAIN, 14));
 				cancelButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						//Opening main page

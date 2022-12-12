@@ -12,6 +12,9 @@ import javax.swing.JOptionPane;
 
 import java.awt.GridBagConstraints;
 import javax.swing.JTextField;
+import javax.swing.SpinnerListModel;
+import javax.swing.SpinnerModel;
+
 import java.awt.Insets;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -24,6 +27,7 @@ import java.util.Scanner;
 import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.JSpinner;
 
 public class editAccount extends JDialog {
 
@@ -37,7 +41,7 @@ public class editAccount extends JDialog {
 	private Client currentUser;
 	//variable for getting user information from file (before edit)
 	private Client userFromFile;
-	
+	private JSpinner spinner;
 	
 	/**
 	 * Create the dialog.
@@ -45,14 +49,14 @@ public class editAccount extends JDialog {
 	public editAccount(String username) {
 			
 		setTitle("Edit Account Information");
-		setBounds(100, 100, 360, 250);
+		setBounds(100, 100, 397, 250);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		GridBagLayout gbl_contentPanel = new GridBagLayout();
-		gbl_contentPanel.columnWidths = new int[]{35, 58, 35, 117, 37, 0};
+		gbl_contentPanel.columnWidths = new int[]{35, 58, 35, 117, 54, 40, 0};
 		gbl_contentPanel.rowHeights = new int[]{35, 13, 0, 31, 16, 19, 0};
-		gbl_contentPanel.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_contentPanel.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		gbl_contentPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		contentPanel.setLayout(gbl_contentPanel);
 		{
@@ -127,7 +131,7 @@ public class editAccount extends JDialog {
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				JButton okButton = new JButton("OK");
+				JButton okButton = new JButton("Save");
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						try {
@@ -145,8 +149,27 @@ public class editAccount extends JDialog {
 							
 							//changing budget if the field is not empty
 							if(!textField_Budget.getText().isEmpty()) {
+								
+								
+									//converting USD currency of spent money to the newly changed currency
+									if(spinner.getValue().equals("KRW")) {
+										double usdToKrw = currentUser.getMoneySpent() * 1304.27;
+										currentUser.setMoneySpent(usdToKrw);
+									}if(spinner.getValue().equals("EUR")) {
+										double usdToEur = currentUser.getMoneySpent() * 0.95;
+										currentUser.setMoneySpent(usdToEur);
+									}if(spinner.getValue().equals("DKK")) {
+										double usdToDkk = currentUser.getMoneySpent() * 7.06;
+										currentUser.setMoneySpent(usdToDkk);
+									}
 								currentUser.setBudget(Double.parseDouble(textField_Budget.getText()));
-	
+								//for insuring that the currency is set if it's the first time entering budget
+								currentUser.setCurrency(spinner.getValue()+"");
+								
+								//setting a boundary for budget size
+								if(Double.parseDouble(textField_Budget.getText()) > 1000000.0) {
+									throw new Exception("The budget cannot be more than 1.000.000");
+								}
 							}
 							
 							//rewriting/editing current user information (writing user to file)
@@ -164,6 +187,8 @@ public class editAccount extends JDialog {
 							
 						}catch(IOException ex) {
 							ex.printStackTrace();
+						}catch(Exception ex) {
+							JOptionPane.showMessageDialog(editAccount.this, ex.getMessage());
 						}
 					}
 				});
@@ -211,7 +236,25 @@ public class editAccount extends JDialog {
 			textField_Store.setText(userFromFile.getStoreName());
 			
 			//Getting the value to change: Budget and setting to text field
-			textField_Budget.setText(userFromFile.getBudget()+"");
+			if(userFromFile.getBudget() != 00.00) {
+				textField_Budget.setText(userFromFile.getBudget()+"");
+			}else {
+				textField_Budget.setText("00.00");
+			}
+				
+				//Values for the spinner
+				String currencyArray[]  = {"KRW", "USD" , "EUR", "DKK"};
+				//Assigning values to a model that can be passed as a parameter to spinner
+				SpinnerModel model = new SpinnerListModel(currencyArray);
+				//Initializing spinner with array values
+				spinner = new JSpinner(model);
+				GridBagConstraints gbc_spinner = new GridBagConstraints();
+				gbc_spinner.insets = new Insets(0, 0, 0, 5);
+				gbc_spinner.fill = GridBagConstraints.HORIZONTAL;
+				gbc_spinner.gridx = 4;
+				gbc_spinner.gridy = 5;
+				contentPanel.add(spinner, gbc_spinner);
+			
 					
 				
 		} catch (Exception ex) {
@@ -219,7 +262,6 @@ public class editAccount extends JDialog {
 			//ex.printStackTrace();
 		}
 		
-		//set visible? or not
 	}
 
 }

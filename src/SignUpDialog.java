@@ -21,7 +21,10 @@ import java.awt.Insets;
 import javax.swing.ImageIcon;
 import javax.swing.JPasswordField;
 import java.awt.event.ActionListener;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.awt.event.ActionEvent;
@@ -226,13 +229,20 @@ public class SignUpDialog extends JDialog {
 							
 							//Saves budget information if the user decides to fill it out
 							if(!textFieldBudget.getText().isEmpty()) {
-								
+							
+								if(Double.parseDouble(textFieldBudget.getText()) >= 1000000.0) {
+									throw new Exception("The budget cannot be more or equal to 1.000.000");
+								}
 								
 							//checking is the values is double, else -> throws NumberFormatException
 							Double budgetNumber = Double.parseDouble(textFieldBudget.getText());
-							registeredClient.setBudget(budgetNumber);
+								registeredClient.setBudget(budgetNumber);
 								//saving currency value to the client
 								registeredClient.setCurrency(spinnerCurrency.getValue()+"");
+							}else {
+								//sets value to null if budget is not entered
+								registeredClient.setBudget(00.00);
+								registeredClient.setCurrency("USD");
 							}
 								//Saving default spent number to change later
 								registeredClient.setMoneySpent(00.00);
@@ -250,7 +260,9 @@ public class SignUpDialog extends JDialog {
 								throw new Exception("Please fill out all the fileds marked with: * ");
 							}
 							
-							
+							if(doRead() == true) {
+								throw new Exception("This username is taken. Please choose another username");
+							}
 													
 							//Closing the stream and writer
 							buffer.close();
@@ -268,7 +280,6 @@ public class SignUpDialog extends JDialog {
 							
 							//Opening the main application again for login
 							mainApplication main = new mainApplication();
-							main.setVisible(true);
 							//Closing the register dialog
 							dispose();
 							
@@ -280,7 +291,7 @@ public class SignUpDialog extends JDialog {
 						
 					}
 				});
-				okButton.setActionCommand("OK");
+				okButton.setActionCommand("Register");
 				buttonPane.add(okButton);
 				getRootPane().setDefaultButton(okButton);
 			}
@@ -291,7 +302,6 @@ public class SignUpDialog extends JDialog {
 						
 						//Opening the main application again 
 						mainApplication main = new mainApplication();
-						main.setVisible(true);
 						//Closing the register dialog without saving any data
 						dispose();
 					}
@@ -301,5 +311,24 @@ public class SignUpDialog extends JDialog {
 			}
 		}
 	}
+	
+	private boolean doRead() {
+		boolean flage = false;
+		try {
+			FileInputStream inputStream = new FileInputStream("bin\\" +textFieldUsername.getText() +"-Data.data");
+			ObjectInputStream binaryReader = new ObjectInputStream(inputStream);
+				flage = true;
+			
+				//closing streams
+				inputStream.close();
+				binaryReader.close();
+		} catch (IOException e) {
+			
+			flage = false;
+			
+		}
+		
+		return flage;
+	}
 
-}
+}//end of class

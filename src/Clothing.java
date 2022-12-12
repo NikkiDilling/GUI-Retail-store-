@@ -65,7 +65,7 @@ public class Clothing implements Serializable{
 		return totalPrice;
 	}
 	
-	//Method that calculates total price
+	//Method that calculates total price of the clothing item
 	public int calculateTotalPrice() {
 		return  getPricePerItem() * getQuantity();
 	}

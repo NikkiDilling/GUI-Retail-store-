@@ -56,7 +56,7 @@ public class mainApplication extends JFrame {
 		frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
 		
 		//Creating path to background image and placing it in the frame
-		storeIcon = new ImageIcon("background.jpg");
+		storeIcon = new ImageIcon("C:\\Users\\ndill\\eclipse-workspace\\Final Project\\background.jpg");
 		myLabel = new JLabel("", storeIcon,JLabel.CENTER);
 		myLabel.setBackground(Color.WHITE);
 		myLabel.setBounds(0,0,400,600);
@@ -77,8 +77,8 @@ public class mainApplication extends JFrame {
 			}
 		});
 		btnRegister.setFont(new Font("Tahoma", Font.BOLD, 14));
-		btnRegister.setForeground(Color.WHITE);
-		btnRegister.setBackground(Color.RED);
+		btnRegister.setForeground(new Color(0, 0, 0));
+		btnRegister.setBackground(Color.WHITE);
 		//placing the button manually (x,y,width, height)
 		btnRegister.setBounds(95, 250, 200, 40);
 		

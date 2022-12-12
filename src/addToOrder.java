@@ -10,6 +10,8 @@ import javax.swing.border.EmptyBorder;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.Font;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -21,6 +23,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.Color;
+import java.awt.SystemColor;
 
 
 public class addToOrder extends JDialog {
@@ -36,9 +39,10 @@ public class addToOrder extends JDialog {
 	//creating dialog and passing values from the list in Vendor Page
 	public addToOrder(JFrame parentFrame, JTextArea mainTextArea, Order newOrder,String itemName, String price) {
 		super(parentFrame, true);		
+		setFont(new Font("Dialog", Font.PLAIN, 14));
 		
 		setTitle("Add item");
-		setBounds(100, 100, 383, 300);
+		setBounds(100, 100, 383, 306);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -182,25 +186,35 @@ public class addToOrder extends JDialog {
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				JButton okButton = new JButton("OK");
+				JButton okButton = new JButton("ADD");
+				okButton.setFont(new Font("Tahoma", Font.PLAIN, 14));
+				okButton.setBackground(new Color(240, 240, 240));
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						//updating quantity
-						clothesToAdd.setQuantity(Integer.parseInt(textField.getText()));
-						//setting the total price of the clothing
-						clothesToAdd.setTotalPrice();
-						//adding the clothing item in an ArrayList in the Order class
-						newOrder.setItemsArray(clothesToAdd);
-						//closing the thread if it has been initialized
-						if(thread != null) {
-							thread.stop();
+						
+						try {
+							if(Integer.parseInt(textField.getText()) > 200) {
+								throw new Exception ("You cannot order more than 200 items at a time");
+							}
+							//updating quantity
+							clothesToAdd.setQuantity(Integer.parseInt(textField.getText()));
+							//setting the total price of the clothing
+							clothesToAdd.setTotalPrice();
+							//adding the clothing item in an ArrayList in the Order class
+							newOrder.setItemsArray(clothesToAdd);
+							//closing the thread if it has been initialized
+							if(thread != null) {
+								thread.stop();
+							}
+							mainTextArea.append("Item: " + clothesToAdd.getItemName() + "added to order: " + newOrder.getOrderNumber() +"\n");
+							mainTextArea.append("Quantity added: " + clothesToAdd.getQuantity() + "\n");
+							mainTextArea.append("Price: " + clothesToAdd.getTotalPrice() + " USD\n" );
+							mainTextArea.append("=====================================================" + "\n");
+							System.out.println("(addToOrder) item added");
+							dispose();
+						}catch(Exception ex) {
+							JOptionPane.showMessageDialog(addToOrder.this, ex.getMessage());
 						}
-						mainTextArea.append("Item: " + clothesToAdd.getItemName() + "added to order: " + newOrder.getOrderNumber() +"\n");
-						mainTextArea.append("Quantity added: " + clothesToAdd.getQuantity() + "\n");
-						mainTextArea.append("Price: " + clothesToAdd.getTotalPrice() + "\n" );
-						mainTextArea.append("=====================================================" + "\n");
-						System.out.println("(addToOrder) item added");
-						dispose();
 					}
 				});
 				okButton.setActionCommand("OK");
@@ -209,6 +223,7 @@ public class addToOrder extends JDialog {
 			}
 			{
 				JButton cancelButton = new JButton("Cancel");
+				cancelButton.setFont(new Font("Tahoma", Font.PLAIN, 14));
 				cancelButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						//Closing the dialog without saving any data

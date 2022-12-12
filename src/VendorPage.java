@@ -32,6 +32,7 @@ import java.awt.event.MouseListener;
 
 import javax.swing.JButton;
 import java.awt.Insets;
+import java.awt.SystemColor;
 
 
 public class VendorPage extends JFrame {
@@ -52,6 +53,8 @@ public class VendorPage extends JFrame {
 	private JMenuItem menu_showOrders;
 	// variable to check if the client user is initialized (user data file exists)
 	private Client currentUser;
+	//variable to save the client read from file
+	private Client userFromFile;
 	//List variables
 	private JList<String> list;//receives data from listModel
 	//receives data from listData
@@ -90,6 +93,10 @@ public class VendorPage extends JFrame {
 	private JMenuItem menuResetTextArea;
 	private JMenuItem menu_sortItems;
 	
+	private FileInputStream inputStream; //global variable for reading from file
+	private ObjectInputStream binaryReader; //global variable to pass inputstream to 
+	private JMenuItem menu_LogOut;
+	private JButton btnCancelOrder;
 	
 	/**
 	 * Create the frame.
@@ -99,9 +106,27 @@ public class VendorPage extends JFrame {
 	public VendorPage(String username) throws FileNotFoundException {
 		VendorPage.username = username; //setting the user name
 		
-		setTitle("Order Managment");
+		//checking if the file for the logged on client data exists
+		if(doRead() == true) {
+			
+				//Initializing streams
+			try {
+			    inputStream = new FileInputStream("bin\\" +username +"-Data.data");
+				binaryReader = new ObjectInputStream(inputStream);
+				
+				//initializing the global temporary variable to use when reading information from file
+				userFromFile = (Client) binaryReader.readObject();
+				
+			} catch (IOException | ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+		}
+		
+		setTitle("Store Order Managment System");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 752, 523);
+		setBounds(100, 100, 823, 523);
 		
 		menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
@@ -132,6 +157,19 @@ public class VendorPage extends JFrame {
 				dispose();
 			}
 		});
+		
+		//function that performs log out (unsaved information will be lost)
+		menu_LogOut = new JMenuItem("Log out");
+		menu_LogOut.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//JOptionPane.showConfirmDialog(VendorPage.this, "All unsaved information will be lost");
+				//creating a new main frame
+				mainApplication main = new mainApplication();
+				//closing the current frame
+				dispose();
+			}
+		});
+		mnNewMenu.add(menu_LogOut);
 		mnNewMenu.add(menu_changeAccInformation);
 		
 		mnNewMenu_2 = new JMenu("Items");
@@ -145,12 +183,6 @@ public class VendorPage extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				
 				try {
-					
-					FileInputStream inputStream = new FileInputStream("bin\\" +username +"-Data.data");
-					ObjectInputStream binaryReader = new ObjectInputStream(inputStream);
-				
-					//Initializing a client if the client information exists
-					Client userFromFile = (Client) binaryReader.readObject();
 					
 					//showing orders if the array is not null
 					if(!userFromFile.getClientOrders().isEmpty()) {
@@ -193,13 +225,12 @@ public class VendorPage extends JFrame {
 												" Price: " +item.getTotalPrice() +" \n");
 								
 									}
-									mainTextArea.append("Total order price: " +clickedOrder.getTotalOrderPrice() + " USD\n");
+									mainTextArea.append("Total order price: " +clickedOrder.getTotalOrderPrice() + " " + userFromFile.getCurrency() +"\n");
 									//Order end
 									mainTextArea.append("=====================================================" + "\n");
 									
 	
 									}catch(NullPointerException ex){
-										JOptionPane.showMessageDialog(VendorPage.this, ex.getMessage());
 										ex.printStackTrace();
 										
 									}
@@ -214,8 +245,6 @@ public class VendorPage extends JFrame {
 							
 				}catch(IOException ex){
 					JOptionPane.showMessageDialog(VendorPage.this, ex.getMessage());
-				}catch(ClassNotFoundException ex){
-					ex.printStackTrace();
 				}
 			}
 		});
@@ -260,18 +289,13 @@ public class VendorPage extends JFrame {
 						String value = listModel.get(indexClothing);
 						//splitting the value string into 2 strings
 						String [] splits = value.split("-");
-						
-						//debugging
-						/*
-						System.out.println("from vendor - [0]: " + splits[0]);
-						System.out.println("from vendor - [1]: " + splits[1]);
-						*/
+
 						System.out.println("(VENDOR) openning add to order");
 					
 						//Creating add to order dialog and passing item and order information
 						addToOrder addDialog = new addToOrder(VendorPage.this, mainTextArea, newOrder, splits[0], splits[1]);				
 						
-							//Enabling buttons the calculate button when an order has an item in it	
+							//Enabling calculate button when an order has an item in it	
 							btnCalculate.setEnabled(true);
 							//cannot save order without calculating total order price
 							//that's how total order price get's set
@@ -285,6 +309,7 @@ public class VendorPage extends JFrame {
 					}
 					
 				});	//end of mouse event/listener
+				
 				
 				
 
@@ -315,6 +340,8 @@ public class VendorPage extends JFrame {
 					newOrder = new Order();
 					mainTextArea.append("Order: " + newOrder.getOrderNumber()+ " is created" + "\n");
 					mainTextArea.append("=====================================================" + "\n");
+					//we can cancel an order when there is a new order
+					btnCancelOrder.setEnabled(true);
 					
 			}
 		});
@@ -328,6 +355,7 @@ public class VendorPage extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 		
 		infoPane = new JPanel();
+		infoPane.setBackground(SystemColor.info);
 		contentPane.add(infoPane, BorderLayout.NORTH);
 		
 		//displaying user data
@@ -381,10 +409,10 @@ public class VendorPage extends JFrame {
 		panelOther = new JPanel();
 		contentPane.add(panelOther, BorderLayout.SOUTH);
 		GridBagLayout gbl_panelOther = new GridBagLayout();
-		gbl_panelOther.columnWidths = new int[]{243, 76, 68, 74, 71, 0, 132, 0};
-		gbl_panelOther.rowHeights = new int[]{25, 0, 0};
-		gbl_panelOther.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panelOther.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_panelOther.columnWidths = new int[]{243, 76, 68, 74, 142, 0, 132, 0, 0};
+		gbl_panelOther.rowHeights = new int[]{25, 0, 0, 0};
+		gbl_panelOther.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panelOther.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panelOther.setLayout(gbl_panelOther);
 		
 		btnCalculate = new JButton("Calculate total price");
@@ -399,12 +427,15 @@ public class VendorPage extends JFrame {
 					threadTask task = new threadTask();
 					thread = new Thread(task);
 					thread.start();
+					
+					//button calculating is disabled after calculating
+					btnCalculate.setEnabled(false);
+					//enabling to save the order after calculating
+					btnSaveOrder.setEnabled(true);
 				}catch(Exception ex) {
 					JOptionPane.showMessageDialog(VendorPage.this, ex.getMessage());
 				}
 				
-				//enabling save order again, since total order price is now set
-				btnSaveOrder.setEnabled(true);
 			}
 		});
 		
@@ -428,7 +459,7 @@ public class VendorPage extends JFrame {
 		panelOther.add(lblDisplayPrice, gbc_lblDisplayPrice);
 		btnCalculate.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		GridBagConstraints gbc_btnCalculate = new GridBagConstraints();
-		gbc_btnCalculate.insets = new Insets(0, 0, 5, 0);
+		gbc_btnCalculate.insets = new Insets(0, 0, 5, 5);
 		gbc_btnCalculate.anchor = GridBagConstraints.NORTHWEST;
 		gbc_btnCalculate.gridx = 6;
 		gbc_btnCalculate.gridy = 0;
@@ -444,21 +475,7 @@ public class VendorPage extends JFrame {
 				btnSaveOrder.setEnabled(false);
 				
 				try {
-					
-					//checking if the file for the client data exists
-					if(doRead() == true) {
-						
-						FileInputStream inputStream = new FileInputStream("bin\\" +username +"-Data.data");
-						ObjectInputStream binaryReader = new ObjectInputStream(inputStream);
-					
-						//Initializing a temporary client if the client information exists
-						Client userFromFile = (Client) binaryReader.readObject();
-						
-						
-							//closing stream
-							inputStream.close();
-							binaryReader.close();
-							
+
 						//Initializing the current user information from the file and passed
 						//the old user will be rewritten
 						currentUser = new Client(username,userFromFile.getClientOrders(), userFromFile.getStoreName(),userFromFile.getMoneySpent());
@@ -470,55 +487,47 @@ public class VendorPage extends JFrame {
 
 						}
 						
-						//calculating and setting current users money spent
-						currentUser.setMoneySpent(userFromFile.getMoneySpent() + newOrder.getTotalOrderPrice());
-						//displaying the money spent
-						lblSpentDisplay.setText(currentUser.getMoneySpent()+" USD ");
+						//setting the spent amount for the first time (if there were no previous orders
+						if(userFromFile.getMoneySpent() == 0.0) {
+							currentUser.setMoneySpent(newOrder.getTotalOrderPrice());
+						}else {
+							//calculating and setting current users money spent (if the client had already placed orders)
+							currentUser.setMoneySpent(userFromFile.getMoneySpent() + newOrder.getTotalOrderPrice());
+						}
+						
+						//displaying the money spent in the information bar (yellow)
+						lblSpentDisplay.setText(currentUser.getMoneySpent()+" " + userFromFile.getCurrency() + " ");
 
 					//adding the current order to client arrayList
 					currentUser.getClientOrders().add(newOrder);
 					
-						//rewriting the file with new array
+						//opening output stream and writer
 						FileOutputStream outputStream = new FileOutputStream("bin\\" +username +"-Data.data",false);
 						ObjectOutputStream binaryWriter = new ObjectOutputStream(outputStream);
 						//saving user information (writing user to file)
 						binaryWriter.writeObject(currentUser);
 						
 						//Printing information about saving order to user
-						mainTextArea.append("Order: " + newOrder.getOrderNumber() + " is saved!");
+						mainTextArea.append("Order: " + newOrder.getOrderNumber() + " is saved!\n");
+						mainTextArea.append("=====================================================" + "\n");
+						mainTextArea.append("To add more items please create new order. \n");
 						mainTextArea.append("=====================================================" + "\n");
 						//debugging
 						System.out.println("current user orders saved" + currentUser.getClientOrders());
 													
 							//enabling menu item "new order" after order was saved
 							menuNewOrder.setEnabled(true);
+							//disabling cancel order after the order is saved
+							btnCancelOrder.setEnabled(false);
 							
-							
-						//closing streams
-							outputStream.close();
-							binaryWriter.close();
-					 	}else {
-							System.out.println("file doesn't exist. Creating file");
-							//Initializing a client if the client array information doesn't exist
-							currentUser = new Client(username);
-							
-							//adding the current order to client arrayList
-							currentUser.getClientOrders().add(newOrder);
-							System.out.println("current user orders" + currentUser.getClientOrders());
-							
-							//creating the file for the first time
-							FileOutputStream outputStream = new FileOutputStream("bin\\" +username +"-Data.data",false);
-							ObjectOutputStream binaryWriter = new ObjectOutputStream(outputStream);
-							//saving user information (writing user to file)
-							binaryWriter.writeObject(currentUser);
-							
-							//closing streams
-							outputStream.close();
-							binaryWriter.close();
-						}
+						//Resetting the calculation label
+						lblDisplayPrice.setText("-");
+						//resetting the counter that is used in the thread after the order was saved
+						indexOfLastItem=0;
 						
-								
-				}catch(IOException | ClassNotFoundException ex) {
+						
+						
+				}catch(IOException ex) {
 										
 						ex.printStackTrace();
 					
@@ -529,34 +538,58 @@ public class VendorPage extends JFrame {
 		});
 		btnSaveOrder.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		GridBagConstraints gbc_btnSaveOrder = new GridBagConstraints();
-		gbc_btnSaveOrder.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnSaveOrder.insets = new Insets(0, 0, 5, 5);
 		gbc_btnSaveOrder.gridx = 6;
 		gbc_btnSaveOrder.gridy = 1;
 		panelOther.add(btnSaveOrder, gbc_btnSaveOrder);
 		
-		//Reading user information from userData.txt and displaying it
+		btnCancelOrder = new JButton("Cancel Order");
+		//by default disabling this button
+		btnCancelOrder.setEnabled(false);
+		btnCancelOrder.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				//printing information to user
+				mainTextArea.append("Order: " + newOrder.getOrderNumber() + " is cancelled\n");
+				mainTextArea.append("=====================================================" + "\n");
+				//disabling save the order & cancel order after it was cancelled
+				btnSaveOrder.setEnabled(false);
+				btnCancelOrder.setEnabled(false);
+				//you can create a new order after the last one was it's cancelled
+				menuNewOrder.setEnabled(true);
+			}
+		});
+		btnCancelOrder.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		GridBagConstraints gbc_btnCancelOrder = new GridBagConstraints();
+		gbc_btnCancelOrder.fill = GridBagConstraints.VERTICAL;
+		gbc_btnCancelOrder.insets = new Insets(0, 0, 0, 5);
+		gbc_btnCancelOrder.gridx = 6;
+		gbc_btnCancelOrder.gridy = 2;
+		panelOther.add(btnCancelOrder, gbc_btnCancelOrder);
+		
+		//Reading user information from userData.txt and displaying it 
+		//used for reading displaying the information when first opening the file
 		try {
-			if(doRead() == true) {
-				
-				FileInputStream inputStream = new FileInputStream("bin\\" +username +"-Data.data");
-				ObjectInputStream binaryReader = new ObjectInputStream(inputStream);
-			
-				//Initializing a client if the client information exists
-				Client userFromFile = (Client) binaryReader.readObject();
 				//Setting the page information from client that is read from file
 				lblStoreNameDisplay.setText(userFromFile.getStoreName()+" ");
-				lblBudgetDisplay.setText(userFromFile.getBudget()+userFromFile.getCurrency()+ " ");
-				lblSpentDisplay.setText(userFromFile.getMoneySpent()+" ");
+				if(userFromFile.getBudget() != 00.00) {
+					lblBudgetDisplay.setText(userFromFile.getBudget()+" "+userFromFile.getCurrency()+ " ");
+				}else {
+					lblBudgetDisplay.setText("-");
+				}
+				
+				//setting spent in the information bar if the client has spent money (has orders)
+				if(!userFromFile.getClientOrders().isEmpty()) {
+					lblSpentDisplay.setText(userFromFile.getMoneySpent()+" "+userFromFile.getCurrency()+ " ");
+				}
 				//debugging
 				System.out.println("(542)money spent file: " + userFromFile.getMoneySpent());
 				
-				//closing streams
+				//closing streams initialized in the begging of the frame
 				inputStream.close();
 				binaryReader.close();
-			}
+			
 		}catch(Exception ex) {
-			//error with reading the file
-			JOptionPane.showMessageDialog(VendorPage.this, ex.getMessage());
+			
 		}
 		
 		//Setting the frame to be visible
@@ -572,54 +605,96 @@ public class VendorPage extends JFrame {
 
 		@Override
 		public void run() {
+			
+	
+			//saving currency from a global variable that serves as a temporary user that is read from file
+			String currency = userFromFile.getCurrency();
+			
 			System.out.println("(THREAD) calculating");
 			//saving the current order price in a variable (default value)
-			int totalOrderPrice = newOrder.getTotalOrderPrice();
+			double totalOrderPrice = newOrder.getTotalOrderPrice();
 			
-			//btn calculating is disabled while calculating
-			btnCalculate.setEnabled(false);
-			
-			if(lblDisplayPrice.getText().equals("-")) {
+			//fixing double calculation with this if-else-statement
+			if(indexOfLastItem == 0) {
 			//Going through the order item array and calculating the total price one by one
 				for(Clothing item : newOrder.getItemsArray()) {
 					
 					try {
 						//slowing down the thread for smooth display
-						thread.sleep(100);
-					
-					
+						thread.sleep(100);				
 						
 							//calculating final order price
 							totalOrderPrice += item.getTotalPrice();
 							//updating the price in order class
 							newOrder.setTotalOrderPrice(totalOrderPrice);
 							//updating the label in Vendor class
-							newOrder.setLabelTotalPrice(lblDisplayPrice);
+							newOrder.setLabelTotalPrice(lblDisplayPrice, "USD");
 							//updating the index
 							indexOfLastItem++;
-					
+							System.out.println("index of item: " + indexOfLastItem);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}//end of for each loop
+				
+						//converting USD currency of the order to clients budget currency
+						if(currency.equals("KRW")) {
+							double usdToKrw = totalOrderPrice * 1304.27;
+							totalOrderPrice = usdToKrw;
+						}if(currency.equals("EUR")) {
+							double usdToEur = totalOrderPrice * 0.95;
+							totalOrderPrice = usdToEur;
+						}if(currency.equals("DKK")) {
+							double usdToDkk = totalOrderPrice * 7.06;
+							totalOrderPrice = usdToDkk;
+						}
+						//updating the price in order class after converting to other currency
+						newOrder.setTotalOrderPrice(totalOrderPrice);
+						//updating the label in Vendor class
+						newOrder.setLabelTotalPrice(lblDisplayPrice, currency);
 			}else {
+				//new variale for summing usd price, converting and then adding to the total price
+				double newItemsPrice = 0;
 				//add the price of the newly added items to the previous calculation of the total order price
 				for(int i = indexOfLastItem; i < newOrder.getItemsArray().size(); i++) {
-					//calculating final order price
-					totalOrderPrice += newOrder.getItemsArray().get(i).getTotalPrice();
-					//updating the price in order class
-					newOrder.setTotalOrderPrice(totalOrderPrice);
+					System.out.println("thread else item:" + newOrder.getItemsArray().get(i).getTotalPrice());
+					try {
+						//slowing down the thread for smooth display
+						thread.sleep(100);
+					//saving the price of the current item in USD
+					newItemsPrice = newOrder.getItemsArray().get(i).getTotalPrice();
+					
+					//converting USD currency of the newly added item to clients budget currency
+					if(currency.equals("KRW")) {
+						double usdToKrw = newItemsPrice * 1304.27;
+						newItemsPrice = usdToKrw;
+					}if(currency.equals("EUR")) {
+						double usdToEur = newItemsPrice * 0.95;
+						newItemsPrice = usdToEur;
+					}if(currency.equals("DKK")) {
+						double usdToDkk = newItemsPrice * 7.06;
+						newItemsPrice = usdToDkk;
+					}
+					//updating the price in order class with the converted single item
+					newOrder.setTotalOrderPrice(totalOrderPrice + newItemsPrice);
+					System.out.println("total in else: " + totalOrderPrice + newItemsPrice);
 					//updating the label in Vendor class
-					newOrder.setLabelTotalPrice(lblDisplayPrice);
+					newOrder.setLabelTotalPrice(lblDisplayPrice, currency);
 					//updating the index
 					indexOfLastItem++;
-				}
-			}
-
+					
+					}catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}	
+				}//end of for each loop in else			
+				
+		
+			}//end of else
 		}
 		
-	}
+	}//end of thread
 	
 	private boolean doRead() {
 		boolean flage = false;
