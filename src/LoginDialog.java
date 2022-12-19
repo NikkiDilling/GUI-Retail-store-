@@ -15,6 +15,7 @@ import javax.swing.JTextField;
 import java.awt.Insets;
 import javax.swing.JPasswordField;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.LinkedList;
@@ -106,7 +107,7 @@ public class LoginDialog extends JDialog {
 							//saving the user name
 							//only used if login is successful to pass as parameter
 							userName = textField_Username.getText();
-							FileInputStream stream = new FileInputStream("userData.txt");
+							FileInputStream stream = new FileInputStream(returnFileLocation()+ "\\userData.txt");
 							Scanner buffer = new Scanner(stream);
 							
 							//Creating a linked list to store true conditions if the user input and stream inputs match
@@ -188,4 +189,13 @@ public class LoginDialog extends JDialog {
 			
 		}
 	}
+	
+	
+	public static String returnFileLocation() {
+		
+		File jarPath=new File(SignUpDialog.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+		System.out.println(" class path: "+ jarPath);
+		return jarPath +"";
+	}
+	
 }

@@ -1,2 +1,0 @@
-UserName:nikki
-Password:1

@@ -109,7 +109,7 @@ public class mainApplication extends JFrame {
 		
 	
 		
-	}
+	}//end of the frame
 	
 
 }

@@ -16,6 +16,7 @@ import javax.swing.SpinnerListModel;
 import javax.swing.SpinnerModel;
 
 import java.awt.Insets;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -136,7 +137,7 @@ public class editAccount extends JDialog {
 					public void actionPerformed(ActionEvent e) {
 						try {
 							
-							FileOutputStream outputStream = new FileOutputStream("bin\\" +username +"-Data.data",false);
+							FileOutputStream outputStream = new FileOutputStream(returnFileLocation()+ "\\" +username +"-Data.data",false);
 							ObjectOutputStream binaryWriter = new ObjectOutputStream(outputStream);
 							
 														
@@ -221,7 +222,7 @@ public class editAccount extends JDialog {
 		
 		try {
 
-			FileInputStream inputStream = new FileInputStream("bin\\" +username +"-Data.data");
+			FileInputStream inputStream = new FileInputStream(returnFileLocation()+ "\\" +username +"-Data.data");
 			ObjectInputStream binaryReader = new ObjectInputStream(inputStream);
 		
 			//Initializing a temporary client 
@@ -263,5 +264,13 @@ public class editAccount extends JDialog {
 		}
 		
 	}
-
+	
+	
+	public static String returnFileLocation() {
+		
+		File jarPath=new File(SignUpDialog.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+		System.out.println(" class path: "+ jarPath);
+		return jarPath +"";
+	}
+	
 }

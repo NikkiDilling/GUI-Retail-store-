@@ -21,6 +21,7 @@ import java.awt.Insets;
 import javax.swing.ImageIcon;
 import javax.swing.JPasswordField;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -59,7 +60,7 @@ public class SignUpDialog extends JDialog {
 			{
 				
 				JLabel img = new JLabel("");
-				img.setIcon(new ImageIcon("C:\\Users\\ndill\\eclipse-workspace\\Final Project\\imgStore2.jpg"));
+				img.setIcon(new ImageIcon("C:\\Users\\ndill\\eclipse-workspace\\Final Project\\registerImg.jpg"));
 				panelImg.add(img);
 			}
 		}
@@ -210,7 +211,7 @@ public class SignUpDialog extends JDialog {
 						
 						try {
 							//Initializing the stream and buffer
-							outputstream = new FileOutputStream("userData.txt",true);
+							outputstream = new FileOutputStream(returnFileLocation()+ "\\userData.txt",true);
 							buffer = new PrintWriter(outputstream);
 							
 							//Assigning getter methods into variables, for easier use
@@ -271,7 +272,7 @@ public class SignUpDialog extends JDialog {
 							//Saving the registered client for the first time
 							//first time writing binary file for registered client
 								//each user has unique data file (user name + type of document) in bin folder
-								FileOutputStream outputStream = new FileOutputStream("bin\\" + getUsername +"-Data.data",false);
+								FileOutputStream outputStream = new FileOutputStream(returnFileLocation()+ "\\" + getUsername +"-Data.data",false);
 								ObjectOutputStream binaryWriter = new ObjectOutputStream(outputStream);
 								//saving user information (writing user to file)
 								binaryWriter.writeObject(registeredClient);
@@ -315,8 +316,8 @@ public class SignUpDialog extends JDialog {
 	private boolean doRead() {
 		boolean flage = false;
 		try {
-			FileInputStream inputStream = new FileInputStream("bin\\" +textFieldUsername.getText() +"-Data.data");
-			ObjectInputStream binaryReader = new ObjectInputStream(inputStream);
+			FileInputStream inputStream = new FileInputStream(returnFileLocation()+ "\\" +textFieldUsername.getText() +"-Data.data");
+			ObjectInputStream binaryReader = new ObjectInputStream(inputStream); 
 				flage = true;
 			
 				//closing streams
@@ -329,6 +330,14 @@ public class SignUpDialog extends JDialog {
 		}
 		
 		return flage;
+	}//end of method
+	
+	public static String returnFileLocation() {
+		
+		File jarPath=new File(SignUpDialog.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+		System.out.println(" class path: "+ jarPath);
+		return jarPath +"";
 	}
+	
 
 }//end of class

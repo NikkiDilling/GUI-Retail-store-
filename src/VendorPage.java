@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -111,7 +112,7 @@ public class VendorPage extends JFrame {
 			
 				//Initializing streams
 			try {
-			    inputStream = new FileInputStream("bin\\" +username +"-Data.data");
+			    inputStream = new FileInputStream(returnFileLocation()+ "\\" +username +"-Data.data");
 				binaryReader = new ObjectInputStream(inputStream);
 				
 				//initializing the global temporary variable to use when reading information from file
@@ -502,7 +503,7 @@ public class VendorPage extends JFrame {
 					currentUser.getClientOrders().add(newOrder);
 					
 						//opening output stream and writer
-						FileOutputStream outputStream = new FileOutputStream("bin\\" +username +"-Data.data",false);
+						FileOutputStream outputStream = new FileOutputStream(returnFileLocation()+ "\\" +username +"-Data.data",false);
 						ObjectOutputStream binaryWriter = new ObjectOutputStream(outputStream);
 						//saving user information (writing user to file)
 						binaryWriter.writeObject(currentUser);
@@ -633,7 +634,7 @@ public class VendorPage extends JFrame {
 							indexOfLastItem++;
 							System.out.println("index of item: " + indexOfLastItem);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
+					
 						e.printStackTrace();
 					}
 				}//end of for each loop
@@ -685,7 +686,7 @@ public class VendorPage extends JFrame {
 					indexOfLastItem++;
 					
 					}catch (InterruptedException e) {
-						// TODO Auto-generated catch block
+					
 						e.printStackTrace();
 					}	
 				}//end of for each loop in else			
@@ -699,7 +700,7 @@ public class VendorPage extends JFrame {
 	private boolean doRead() {
 		boolean flage = false;
 		try {
-			FileInputStream inputStream = new FileInputStream("bin\\" +VendorPage.username +"-Data.data");
+			FileInputStream inputStream = new FileInputStream(returnFileLocation()+ "\\" +VendorPage.username +"-Data.data");
 			ObjectInputStream binaryReader = new ObjectInputStream(inputStream);
 				flage = true;
 			
@@ -713,7 +714,16 @@ public class VendorPage extends JFrame {
 		}
 		
 		return flage;
+	}//end of method
+	
+	
+	public static String returnFileLocation() {
+		
+		File jarPath=new File(SignUpDialog.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+		System.out.println(" class path: "+ jarPath);
+		return jarPath +"";
 	}
+	
 	
 	
 }//end of Class
